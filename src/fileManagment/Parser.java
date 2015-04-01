@@ -10,8 +10,8 @@ public class Parser {
 		 REMOVED,
 		 TRASH};
 	
-	Headers subPro;
-	String message;
+	private Headers subPro;
+	private String message;
 
 	public Parser(String message) {
 		this.message = message;
@@ -42,6 +42,16 @@ public class Parser {
 		case PUTCHUNK:
 			System.out.println("Worked");
 			ret = 1;
+			break;
+		case GETCHUNK:
+			break;
+		case STORED:
+			break;
+		case DELETE:
+			break;
+		case CHUNK:
+			break;
+		case REMOVED:
 			break;
 		case TRASH:
 			System.out.println("Message doesn't fit in Protocol");

@@ -7,13 +7,21 @@ import java.net.UnknownHostException;
 
 public class Sender extends Thread{
     
-    final static String INET_ADDR = "224.0.0.3";
-    final static int PORT = 4444;
+    private InetAddress address;
+    private int PORT;
+    
 
-    public static void main() throws UnknownHostException, InterruptedException {
+	public Sender(int Port,String INET_ADDR) throws UnknownHostException {
+
+		address = InetAddress.getByName(INET_ADDR);
+		this.PORT = Port;
+
+	}
+
+
+    public void run() {
         // Get the address that we are going to connect to.
-        InetAddress addr = InetAddress.getByName(INET_ADDR);
-     
+      
         // Open a new DatagramSocket, which will be used to send the data.
         try (DatagramSocket serverSocket = new DatagramSocket()) {
             for (int i = 0; i < 3; i++) {
@@ -22,7 +30,7 @@ public class Sender extends Thread{
                 // Create a packet that will contain the data
                 // (in the form of bytes) and send it.
                 DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),
-                        msg.getBytes().length, addr, PORT);
+                        msg.getBytes().length, address, PORT);
                 serverSocket.send(msgPacket);
      
                 System.out.println("Server sent packet with msg: " + msg);
