@@ -25,13 +25,16 @@ public class Main {
 			//Listener mdrThread = new Listener(MDRPort,MDRaddress);
 			
 			mcThread.start();
+			
+			
+			Sender client = new Sender(MCPort, MCaddress);
 			//mdbThread.start();
 			//mdrThread.start();
+			client.cli();
 			
 		}
 
-
-
+		
 
 	}
 
