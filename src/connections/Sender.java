@@ -11,14 +11,14 @@ import java.util.Scanner;
 
 public class Sender {
 
-	private InetAddress address;
-	private int PORT;
+	private InetAddress mcAddress;
+	private int mcPORT;
 
 
-	public Sender(int Port,String INET_ADDR) throws UnknownHostException {
+	public Sender(int mcPort,String mcAdd,int mdbPort, String mdbAdd,int mdrPort,String mdrAdd) throws UnknownHostException {
 
-		address = InetAddress.getByName(INET_ADDR);
-		this.PORT = Port;
+		mcAddress = InetAddress.getByName(mcAdd);
+		this.mcPORT = mcPort;
 
 	}
 
@@ -27,7 +27,6 @@ public class Sender {
 	{
 		Scanner sc = new Scanner(System.in);
 		boolean stayLoop = true;
-		String fileName;
 		do
 		{		
 
@@ -37,22 +36,16 @@ public class Sender {
 					+ "3 - Delete File\n"
 					+ "4 - Space Reclaming\n"
 					+ "5 - Exit");
-			
+
 			int input = sc.nextInt();
 
 			switch (input) {
 			case 1:
-				System.out.println("Filename?");
-				fileName = sc.next();
-				backUp(fileName);
+				backUp(sc);
 				break;
-			case 2:
-				System.out.println("Filename?");
-				fileName = sc.nextLine();				
+			case 2:			
 				break;
-			case 3:
-				System.out.println("Filename?");
-				fileName = sc.nextLine();				
+			case 3:	
 				break;
 			case 4:			
 				break;			
@@ -63,10 +56,11 @@ public class Sender {
 				break;
 			}
 
+			
 		}while(stayLoop);
 
 		sc.close();
-		
+
 	}
 
 
@@ -75,22 +69,30 @@ public class Sender {
 		String ret = "";
 		for(int i = 0; i < hash.length;i++)
 		{
-			
-			
+
+
 		}
 		return ret;
 	}
-	
-	private void backUp(String file) 
+
+	private void backUp(Scanner sc) 
 	{
-		try {
+		String fileName;
+		String version;
+		String repDeg;
+		String header;
+		/*try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			
+
 			md.update(file.getBytes("ASCII")); // Change this to "UTF-16" if needed
 			byte[] hashed = md.digest();
-			
+
 			System.out.println(hashed);
-			
+
+
+
+
+
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -98,10 +100,38 @@ public class Sender {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+		 */
+
+		//<MessageType> <Version> <FileId> <ChunkNo> <ReplicationDeg> <CRLF
+		System.out.println("File Name?");
+		fileName = sc.next();	
+		System.out.println("Version?");
+		version = sc.next();
+		System.out.println("Replication Degree?");
+		repDeg = sc.next();
+
+		header = "PUTCHUNK " + version + " " + fileName+ " "  + "0"+ " " + repDeg + " "+ 0xD + 0xA;
+
+
+		try (DatagramSocket serverSocket = new DatagramSocket()) {
+		//	for (int i = 0; i < 3; i++) {
+			
+
+				// Create a packet that will contain the data
+				// (in the form of bytes) and send it.
+				DatagramPacket msgPacket = new DatagramPacket(header.getBytes(),
+						header.getBytes().length, mcAddress, mcPORT);
+				serverSocket.send(msgPacket);
+
+				System.out.println("Server sent packet with msg: " + header);
+				//Thread.sleep(500);
+			//}
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
 	}
-	
+
 
 	public void run() {
 		// Get the address that we are going to connect to.
@@ -113,8 +143,9 @@ public class Sender {
 
 				// Create a packet that will contain the data
 				// (in the form of bytes) and send it.
+				
 				DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),
-						msg.getBytes().length, address, PORT);
+						msg.getBytes().length, mcAddress, mcPORT);
 				serverSocket.send(msgPacket);
 
 				System.out.println("Server sent packet with msg: " + msg);

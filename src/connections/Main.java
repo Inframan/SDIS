@@ -27,7 +27,7 @@ public class Main {
 			mcThread.start();
 			
 			
-			Sender client = new Sender(MCPort, MCaddress);
+			Sender client = new Sender(MCPort, MCaddress,MDBPort,MDBaddress,MDRPort,MDRaddress);
 			//mdbThread.start();
 			//mdrThread.start();
 			client.cli();
