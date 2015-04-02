@@ -34,14 +34,14 @@ public class Parser {
 		
 	}	 
 		 
-	public int assignChunk()
+	public String assignChunk()
 	{
-		int ret = 0;
+		String confirmMessage = "";
 		switch(subPro)
 		{
 		case PUTCHUNK:
 			System.out.println("Worked");
-			ret = 1;
+			confirmMessage = confirmBackup(message);
 			break;
 		case GETCHUNK:
 			break;
@@ -55,7 +55,6 @@ public class Parser {
 			break;
 		case TRASH:
 			System.out.println("Message doesn't fit in Protocol");
-			ret = -1;
 			break;
 		default:
 			System.out.println("Work in progress...");
@@ -64,8 +63,17 @@ public class Parser {
 		
 		}
 		
-		return ret;
+		return confirmMessage;
 	}
 	 
+	
+	private String confirmBackup(String msg){
+		String stored =  "STORED";
+		String[] tokens= msg.split(" ");
+		stored += " " + tokens[1] +" " + tokens[2] +" " + tokens[3] + " " + tokens[5];
+		System.out.println(stored);
+		return stored;
+	}
+	
 
 }

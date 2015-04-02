@@ -4,21 +4,33 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
+import fileManagment.Parser;
+import fileManagment.Parser.Headers;
+
 public class Sender {
 
 	private InetAddress mcAddress;
+	private InetAddress mdbAddress;
+	private InetAddress mdrAddress;
 	private int mcPORT;
-
+	private int mdbPORT;
+	private int mdrPORT;
+	
 
 	public Sender(int mcPort,String mcAdd,int mdbPort, String mdbAdd,int mdrPort,String mdrAdd) throws UnknownHostException {
 
 		mcAddress = InetAddress.getByName(mcAdd);
 		this.mcPORT = mcPort;
+		mdbAddress = InetAddress.getByName(mdbAdd);
+		this.mdbPORT = mdbPort;
+		mdrAddress = InetAddress.getByName(mdrAdd);
+		this.mdrPORT = mdrPort;
 
 	}
 
@@ -104,7 +116,9 @@ public class Sender {
 
 		//<MessageType> <Version> <FileId> <ChunkNo> <ReplicationDeg> <CRLF
 		System.out.println("File Name?");
-		fileName = sc.next();	
+		fileName = sc.nextLine();	
+		if (fileName.equals(""))
+		fileName = sc.nextLine();
 		System.out.println("Version?");
 		version = sc.next();
 		System.out.println("Replication Degree?");
@@ -114,23 +128,92 @@ public class Sender {
 
 
 		try (DatagramSocket serverSocket = new DatagramSocket()) {
-		//	for (int i = 0; i < 3; i++) {
-			
-
-				// Create a packet that will contain the data
-				// (in the form of bytes) and send it.
 				DatagramPacket msgPacket = new DatagramPacket(header.getBytes(),
-						header.getBytes().length, mcAddress, mcPORT);
+						header.getBytes().length, mdbAddress, mdbPORT);
 				serverSocket.send(msgPacket);
 
 				System.out.println("Server sent packet with msg: " + header);
 				//Thread.sleep(500);
-			//}
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
 
 	}
+	
+	public void sendConfirm(String confirmMessage){
+		
+		if(confirmMessage.startsWith("STORED"))
+			sendConfirmMc(confirmMessage);
+		else if(confirmMessage.startsWith("CHUNK"))
+			sendConfirmMdr(confirmMessage);
+		
+		
+	}
+
+	public void sendConfirmMc(String confirmMessage){
+		// Open a new DatagramSocket, which will be used to send the data.
+				try (DatagramSocket serverSocket = new DatagramSocket()) {
+						DatagramPacket msgPacket = new DatagramPacket(confirmMessage.getBytes(),
+								confirmMessage.getBytes().length, mcAddress, mcPORT);
+						serverSocket.send(msgPacket);
+						System.out.println("Server sent packet with msg: " + confirmMessage);
+						
+						
+					
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+		
+	}
+
+	public void sendConfirmMdb(String confirmMessage){
+		// Open a new DatagramSocket, which will be used to send the data.
+				try (DatagramSocket serverSocket = new DatagramSocket()) {
+						DatagramPacket msgPacket = new DatagramPacket(confirmMessage.getBytes(),
+								confirmMessage.getBytes().length, mdbAddress, mdbPORT);
+						serverSocket.send(msgPacket);
+						System.out.println("Server sent packet with msg: " + confirmMessage);
+					
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+		
+	}
+
+	public void sendConfirmMdr(String confirmMessage){
+		// Open a new DatagramSocket, which will be used to send the data.
+				try (DatagramSocket serverSocket = new DatagramSocket()) {
+						DatagramPacket msgPacket = new DatagramPacket(confirmMessage.getBytes(),
+								confirmMessage.getBytes().length, mdrAddress, mdrPORT);
+						serverSocket.send(msgPacket);
+						System.out.println("Server sent packet with msg: " + confirmMessage);
+					
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+		
+	}
+	
+	
+	public void receivedConfirm()
+	{
+		try (MulticastSocket client = new MulticastSocket(PORT)) {
+
+			clientMC.joinGroup(address);
+
+			while (true) {
+				byte[] buffer;
+				DatagramPacket msgPacket = new DatagramPacket(buffer, buffer.length);
+				clientMc.receive(msgPacket);
+
+		String msg = new String(buffer, 0, buffer.length);
+		
+			}
+		}
+		parseMsg = new Parser(msg);
+	}
+	
+	
 
 
 	public void run() {

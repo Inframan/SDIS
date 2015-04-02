@@ -12,6 +12,7 @@ public class Main {
 			System.out.println("Function args:  <MCAddr> <MCPort> <MDBAddr> <MDBPort> <MDRAddr> <MDRPort>");
 		else
 		{
+			
 			String MCaddress = Args[0];
 			int MCPort = Integer.parseInt(Args[1]);
 			String MDBaddress = Args[2];
@@ -19,15 +20,15 @@ public class Main {
 			String MDRaddress = Args[4];
 			int MDRPort = Integer.parseInt(Args[5]);
 
+			Sender client = new Sender(MCPort, MCaddress,MDBPort,MDBaddress,MDRPort,MDRaddress);
 
-			Listener mcThread = new Listener(MCPort,MCaddress);
-		//	Listener mdbThread = new Listener(MDBPort,MDBaddress);
-			//Listener mdrThread = new Listener(MDRPort,MDRaddress);
+			Listener mcThread = new Listener(MCPort,MCaddress, client);
+			Listener mdbThread = new Listener(MDBPort,MDBaddress, client);
+			Listener mdrThread = new Listener(MDRPort,MDRaddress, client);
 			
 			mcThread.start();
 			
 			
-			Sender client = new Sender(MCPort, MCaddress,MDBPort,MDBaddress,MDRPort,MDRaddress);
 			//mdbThread.start();
 			//mdrThread.start();
 			client.cli();
