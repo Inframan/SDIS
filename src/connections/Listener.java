@@ -7,7 +7,6 @@ import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-import org.omg.PortableInterceptor.ClientRequestInfo;
 
 import fileManagment.Parser;
 
@@ -50,7 +49,9 @@ public class Listener extends Thread {
 				Random r = new Random();
 				sleep(r.nextInt(400));
 				
-				client.sendConfirm(confirmMessage);
+				
+				QuickReply reply = new QuickReply(confirmMessage, client);
+				reply.start();				
 				
 				
 				buffer = new byte[256];

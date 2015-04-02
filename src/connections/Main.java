@@ -24,9 +24,10 @@ public class Main {
 
 			Listener mcThread = new Listener(MCPort,MCaddress, client);
 			Listener mdbThread = new Listener(MDBPort,MDBaddress, client);
-			Listener mdrThread = new Listener(MDRPort,MDRaddress, client);
+			//Listener mdrThread = new Listener(MDRPort,MDRaddress, client);
 			
 			mcThread.start();
+			mdbThread.start();
 			
 			
 			//mdbThread.start();
