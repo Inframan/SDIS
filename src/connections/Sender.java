@@ -73,7 +73,6 @@ public class Sender {
 	private void backUp(Scanner sc) 
 	{
 		String fileName;
-		String version;
 		Integer repDeg;
 		String header;
 		/*try {
@@ -102,12 +101,13 @@ public class Sender {
 		fileName = sc.nextLine();	
 		if (fileName.equals(""))
 			fileName = sc.nextLine();
-		System.out.println("Version?");
-		version = sc.next();
 		System.out.println("Replication Degree?");
 		repDeg = sc.nextInt();
 
-		header = "PUTCHUNK " + version + " " + fileName+ " "  + "0"+ " " + repDeg.toString() + " "+ 0xD + 0xA;
+		byte CR = 0xD;
+		byte LF = 0xA;
+		
+		header = "PUTCHUNK 1.0 " + fileName+ " "  + "0"+ " " + repDeg.toString() + " " + CR + LF;
 
 
 		try (DatagramSocket serverSocket = new DatagramSocket()) {
@@ -117,12 +117,22 @@ public class Sender {
 
 			System.out.println("Server sent packet with msg: " + header);
 			//Thread.sleep(500);
+			
+			StoredListener confirmListener = new StoredListener(mcPORT, mcAddress);
+			
+			synchronized (confirmListener) {
+				confirmListener.wait(500);
+			}
+			
+			receivedStoredChunk(repDeg);
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		
-		receivedStoredChunk(repDeg);
 
 	}
 

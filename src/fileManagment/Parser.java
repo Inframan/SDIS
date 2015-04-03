@@ -1,4 +1,7 @@
 package fileManagment;
+
+import connections.Main;
+
 public class Parser {
 
 	public enum Headers{
@@ -49,13 +52,16 @@ public class Parser {
 			{
 			case PUTCHUNK:
 				System.out.println("Received PUTCHUNK");
-				confirmMessage = confirmBackup(message);
+				confirmMessage = confirmBackup();
 				break;
 			case GETCHUNK:
 				System.out.println("Received GETCHUNK");
-				confirmMessage = confirmRestore(message);
+				confirmMessage = confirmRestore();
 				break;
 			case STORED:
+				//Stored Listener wil handle this
+				//System.out.println("Received STORED");
+				//confirmStored();
 				break;
 			case DELETE:
 				break;
@@ -77,31 +83,52 @@ public class Parser {
 		}
 
 
-		private String confirmBackup(String msg){
+		public boolean confirmStored()
+		{
+			String[] tokens= message.split(" ");
+			String crlf = "" + 0xA + 0xD + 0xA + 0xD;
+
+			if(tokens[1].equals(Main.storedVersion) 
+					&& tokens[2].equals(Main.storedFileName)
+					&& tokens[3].equals(Main.storedChunkNo)
+					&& tokens[4].equals(crlf))
+			{
+				notify();
+				return true;
+
+			}		
+			else 
+				return false;
+
+
+		}
+
+
+		private String confirmBackup(){
 			String stored =  "STORED";
-			String[] tokens= msg.split(" ");
-			
+			String[] tokens= message.split(" ");
+
 			if(tokens.length < 6)//NOT IN PROTOCOL
 			{
-				System.out.println("BackUp Message Not In Accordance Protocol: " + msg);
+				System.out.println("BackUp Message Not In Accordance Protocol: " + message);
 				return "";
 			}
-			
+
 			stored += " " + tokens[1] +" " + tokens[2] +" " + tokens[3] + " " + tokens[5];
 			System.out.println(stored);
 			return stored;
 		}
 
 
-		private String confirmRestore(String msg)
+		private String confirmRestore()
 		{
 			//CHUNK <Version> <FileId> <ChunkNo> <CRLF><CRLF><Body>
 
 			String stored =  "CHUNK";
-			String[] tokens= msg.split(" ");
+			String[] tokens= message.split(" ");
 			if(tokens.length < 5)//NOT IN PROTOCOL
 			{
-				System.out.println("BackUp Message Not In Accordance Protocol: " + msg);
+				System.out.println("BackUp Message Not In Accordance Protocol: " + message);
 				return "";
 			}
 			stored += " " + tokens[1] +" " + tokens[2] +" " + tokens[3]+ " "+tokens[4];

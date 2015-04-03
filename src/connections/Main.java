@@ -6,6 +6,10 @@ import java.net.UnknownHostException;
 public class Main {
 
 
+	static public float storedVersion;
+	static public String storedFileName;
+	static public int storedChunkNo;
+	
 	public static void main(String Args[]) throws UnknownHostException {
 
 		if(Args.length != 6)
@@ -24,14 +28,14 @@ public class Main {
 
 			Listener mcThread = new Listener(MCPort,MCaddress, client);
 			Listener mdbThread = new Listener(MDBPort,MDBaddress, client);
-			//Listener mdrThread = new Listener(MDRPort,MDRaddress, client);
+			Listener mdrThread = new Listener(MDRPort,MDRaddress, client);
 			
 			mcThread.start();
 			mdbThread.start();
+			mdrThread.start();
 			
 			
 			//mdbThread.start();
-			//mdrThread.start();
 			client.cli();
 			
 		}
