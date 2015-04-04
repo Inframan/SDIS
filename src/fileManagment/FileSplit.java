@@ -41,8 +41,6 @@ public class FileSplit {
 			fileMap.put(j, Arrays.copyOfRange(chunk, j*64000 , j*64000 +64000));
 		}	
 		
-		
-		
 		if(chunk.length%64000 == 0)
 			fileMap.put(j,new byte[0]);
 	

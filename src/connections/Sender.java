@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -104,36 +103,40 @@ public class Sender {
 		System.out.println("Replication Degree?");
 		repDeg = sc.nextInt();
 
-		byte CR = 0xD;
-		byte LF = 0xA;
+		byte[] ascii = {0xD, 0xA};
+		String crlf = new String(ascii);
 		
-		header = "PUTCHUNK 1.0 " + fileName+ " "  + "0"+ " " + repDeg.toString() + " " + CR + LF;
+
+		////////////////////////NEED TO IMPLEMENT CHUNKNO
+
+		header = "PUTCHUNK 1.0 " + fileName+ " "  + "0"/*CHUNKNO HERE*/+ " " + repDeg.toString() + " " + crlf;
 
 
-		try (DatagramSocket serverSocket = new DatagramSocket()) {
-			DatagramPacket msgPacket = new DatagramPacket(header.getBytes(),
-					header.getBytes().length, mdbAddress, mdbPORT);
-			serverSocket.send(msgPacket);
+		for(int i = 0; i < 3; i++)///tries do get the desired rep degree 3 times, otherwise moves on
+		{
+			Main.stored.replace("filename", fileName);
+			Main.stored.replace("chunkNo", "0");////CHUNKNO HERE
 
-			System.out.println("Server sent packet with msg: " + header);
-			//Thread.sleep(500);
-			
-			StoredListener confirmListener = new StoredListener(mcPORT, mcAddress);
-			
-			synchronized (confirmListener) {
-				confirmListener.wait(500);
-			}
-			
-			receivedStoredChunk(repDeg);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("I CICLES: " + i);
+
+			try (DatagramSocket serverSocket = new DatagramSocket()) {
+				DatagramPacket msgPacket = new DatagramPacket(header.getBytes(),
+						header.getBytes().length, mdbAddress, mdbPORT);
+				serverSocket.send(msgPacket);
+
+				System.out.println("Server sent packet with msg: " + header);
+				//Thread.sleep(500);
+				if(receivedStoredChunk(repDeg, fileName, 0/*CHUNKNO HERE*/))
+				{
+					System.out.println("SENDER: obtained the desired rep degree");
+					Main.stored.replace("confirmationCount", "0");
+					break;
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			} 
+
 		}
-		
-		
-
 	}
 
 	public void sendConfirm(String confirmMessage){
@@ -191,37 +194,37 @@ public class Sender {
 	}
 
 
-	public void receivedStoredChunk(int repDegree)
+	public boolean receivedStoredChunk(int repDegree,String filename, int chunkNo)
 	{
 		System.out.println("Waiting for confirmation...");
-		String msg = "";
 		int confirmationCount = 0;
-		
-		while(confirmationCount < repDegree)
-		{
-			try (MulticastSocket clientMC = new MulticastSocket(mcPORT)) {
 
-				clientMC.joinGroup(mcAddress);
+		try {
 
 
-				byte[] buffer = new byte[256];
-				DatagramPacket msgPacket = new DatagramPacket(buffer, buffer.length);
-				clientMC.receive(msgPacket);
-
-				msg = new String(buffer, 0, buffer.length);
 
 
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			StoredListener confirmListener = new StoredListener(mcPORT, mcAddress,filename,chunkNo);
+
+			confirmListener.start();
+			System.out.println("before");
+			synchronized (confirmListener) {
+				confirmListener.wait(500);
 			}
-			if(msg.startsWith("STORED"))
-				confirmationCount++;
-			else
-				System.out.println("I received Something into the Bridge...\n\n\n\nI DON'T CARE, I LOVE IT!");
+			System.out.println("after");
 		}
-
-		System.out.println("I shall wait no more!");
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		confirmationCount = Integer.parseInt(Main.stored.get("receivedCount"));
+		if(confirmationCount < repDegree)
+			return false;
+		else
+		{
+			System.out.println("OBTAINED DESIRED REP DEG");
+			return true;
+		}
 	}
 
 

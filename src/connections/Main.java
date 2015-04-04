@@ -1,14 +1,13 @@
 package connections;
 
 import java.net.UnknownHostException;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Main {
 
-
-	static public float storedVersion;
-	static public String storedFileName;
-	static public int storedChunkNo;
+	static public ConcurrentHashMap<String, String> stored;
+	
 	
 	public static void main(String Args[]) throws UnknownHostException {
 
@@ -16,6 +15,10 @@ public class Main {
 			System.out.println("Function args:  <MCAddr> <MCPort> <MDBAddr> <MDBPort> <MDRAddr> <MDRPort>");
 		else
 		{
+			stored = new ConcurrentHashMap<>();
+			stored.put("filename", "");
+			stored.put("chunkNo", "0");
+			stored.put("receivedCount","0");
 			
 			String MCaddress = Args[0];
 			int MCPort = Integer.parseInt(Args[1]);

@@ -86,20 +86,42 @@ public class Parser {
 		public boolean confirmStored()
 		{
 			String[] tokens= message.split(" ");
-			String crlf = "" + 0xA + 0xD + 0xA + 0xD;
+			byte ascii[] = {0xD, 0xA}; 
+			String crlf = new String(ascii); 
 
-			if(tokens[1].equals(Main.storedVersion) 
-					&& tokens[2].equals(Main.storedFileName)
-					&& tokens[3].equals(Main.storedChunkNo)
-					&& tokens[4].equals(crlf))
+
+			if( tokens[2].equals(Main.stored.get("filename"))
+					&& tokens[3].equals(Main.stored.get("chunkNo"))
+					&& tokens[4].equals(crlf)
+					)
 			{
-				notify();
+				//	notify();
 				return true;
 
 			}		
-			else 
-				return false;
+			else
+			{
+				if(! (tokens[2].equals(Main.stored.get("filename"))))
+				{
+					System.out.println("FAILED FILENAME: " + Main.stored.get("filename"));
+					System.out.println("TOKENS2: " +tokens[2]);
+				}	
+				if( ! ( tokens[3].equals(Main.stored.get("chunkNo"))))
+				{
+					System.out.println("FALIED CHUNKNO: "+ Main.stored.get("chunkNo"));
+					System.out.println("TOKENS 3: " + tokens[3]);
 
+				}
+
+				if(! (tokens[4].equals(crlf)))
+				{
+					byte[] b = crlf.getBytes();
+					byte[] b2 = tokens[4].getBytes();
+					System.out.println("FAILED CRLF: "+ b[0] +" " + b[1]);
+					System.out.println("TOKENS 4: "+ b2[0] + " " +b[1]);
+				}
+				return false;
+			}
 
 		}
 
